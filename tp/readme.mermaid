@@ -1,0 +1,93 @@
+---
+title: Pattern Abstract Factory - Génération de Documents Bancaires
+---
+classDiagram
+    class RIB {
+        <<interface>>
+        +genererRib() string
+    }
+
+    class Attestation {
+        <<interface>>
+        +genererAttestation() string
+    }
+
+    class RIBParticulier {
+        -rib: string
+        +constructor(rib: string)
+        +genererRib() string
+    }
+
+    class AttestationParticulier {
+        -attestation: string
+        +constructor(attestation: string)
+        +genererAttestation() string
+    }
+
+    class RIBProfessionnel {
+        -rib: string
+        -siret: string
+        +constructor(rib: string, siret: string)
+        +genererRib() string
+    }
+
+    class AttestationProfessionnel {
+        -attestation: string
+        -mentionLegale: string
+        +constructor(attestation: string, mentionLegale: string)
+        +genererAttestation() string
+    }
+
+    class DocumentFactory {
+        <<interface>>
+        +creerRIB() RIB
+        +creerAttestation() Attestation
+    }
+
+    class ParticulierFactory {
+        -client: Particulier
+        +constructor(client: Particulier)
+        +creerRIB() RIB
+        +creerAttestation() Attestation
+    }
+
+    class ProfessionnelFactory {
+        -client: Professionnel
+        +constructor(client: Professionnel)
+        +creerRIB() RIB
+        +creerAttestation() Attestation
+    }
+
+    class Particulier {
+        +rib: string
+        +attestation: string
+        +constructor(rib: string, attestation: string)
+    }
+
+    class Professionnel {
+        +rib: string
+        +attestation: string
+        +siret: string
+        +mentionLegale: string
+        +constructor(rib: string, attestation: string, siret: string, mentionLegale: string)
+    }
+
+    RIB <|.. RIBParticulier : implements
+    RIB <|.. RIBProfessionnel : implements
+    Attestation <|.. AttestationParticulier : implements
+    Attestation <|.. AttestationProfessionnel : implements
+
+    DocumentFactory <|.. ParticulierFactory : implements
+    DocumentFactory <|.. ProfessionnelFactory : implements
+
+    ParticulierFactory --> RIBParticulier : creates
+    ParticulierFactory --> AttestationParticulier : creates
+    ProfessionnelFactory --> RIBProfessionnel : creates
+    ProfessionnelFactory --> AttestationProfessionnel : creates
+
+    ParticulierFactory o-- Particulier : uses
+    ProfessionnelFactory o-- Professionnel : uses
+
+    note for DocumentFactory "Abstract Factory Définit les méthodes de création de documents"
+    note for ParticulierFactory "Factory concrète pour clients particuliers (documents simplifiés)"
+    note for ProfessionnelFactory "Factory concrète pour clients professionnels (documents détaillés)"
