@@ -1,0 +1,98 @@
+---
+title: Pattern Prototype - Système de Génération de Contrats d'Assurance
+---
+classDiagram
+    class IPrototype {
+        <<interface>>
+        +clone() IPrototype
+    }
+
+    class InfosClient {
+        <<interface>>
+        +nom: string
+        +prenom: string
+        +adresse: string
+        +dateDebut: Date
+        +dateFin: Date
+        +montantCouverture: number
+        +franchise?: number
+        +options?: string[]
+    }
+
+    class ClauseStandard {
+        +titre: string
+        +contenu: string
+        +constructor(titre: string, contenu: string)
+        +clone() ClauseStandard
+    }
+
+    class Annexe {
+        +nom: string
+        +contenu: string
+        +constructor(nom: string, contenu: string)
+        +clone() Annexe
+    }
+
+    class Contrat {
+        <<abstract>>
+        #type: string
+        #clausesStandard: ClauseStandard[]
+        #annexes: Annexe[]
+        #infosClient?: InfosClient
+        #numeroContrat: string
+        +constructor(type: string)
+        #initialiserClauses()* void
+        #initialiserAnnexes()* void
+        +clone()* Contrat
+        +personnaliser(infos: InfosClient) void
+    }
+
+    class ContratHabitation {
+        +constructor()
+        #initialiserClauses() void
+        #initialiserAnnexes() void
+        +clone() ContratHabitation
+    }
+
+    class ContratAutomobile {
+        -immatriculation?: string
+        +constructor()
+        #initialiserClauses() void
+        #initialiserAnnexes() void
+        +personnaliserVehicule(immat: string) void
+        +clone() ContratAutomobile
+    }
+
+    class ContratVie {
+        -beneficiaires: string[]
+        +constructor()
+        #initialiserClauses() void
+        #initialiserAnnexes() void
+        +ajouterBeneficiaire(nom: string) void
+        +clone() ContratVie
+    }
+
+    class RegistrePrototypes {
+        -prototypes: Map~string, Contrat~
+        +enregistrer(nom: string, prototype: Contrat) void
+        +creer(nom: string) Contrat
+    }
+
+    IPrototype <|.. ClauseStandard : implements
+    IPrototype <|.. Annexe : implements
+    IPrototype <|.. Contrat : implements
+
+    Contrat <|-- ContratHabitation : extends
+    Contrat <|-- ContratAutomobile : extends
+    Contrat <|-- ContratVie : extends
+
+    Contrat o-- ClauseStandard : contains
+    Contrat o-- Annexe : contains
+    Contrat ..> InfosClient : uses
+
+    RegistrePrototypes o-- Contrat : stores
+    RegistrePrototypes --> Contrat : clones
+
+    note for IPrototype "Interface Prototype Définit la méthode clone() pour créer des copies"
+    note for Contrat "Prototype abstrait Contient les clauses et annexes (coûteux à charger)"
+    note for RegistrePrototypes "Registre de prototypes Stocke les modèles et crée des clones rapidement"
