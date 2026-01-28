@@ -1,0 +1,59 @@
+---
+title: Pattern Bridge - Système de Notification Multi-canal
+---
+
+classDiagram
+    %% Interface pour les canaux d'envoi (Implémentation)
+    class CanalEnvoi {
+        <<interface>>
+        +envoyer(message: string) void
+    }
+
+    %% Implémentations concrètes des canaux
+    class EmailSender {
+        +envoyer(message: string) void
+    }
+
+    class SmsSender {
+        +envoyer(message: string) void
+    }
+
+    class PushSender {
+        +envoyer(message: string) void
+    }
+
+    %% Abstraction - Notifications
+    class NotificationCommande {
+        -canal: CanalEnvoi
+        +constructor(canal: CanalEnvoi)
+        +envoyer(message: string) void
+    }
+
+    class NotificationLivraison {
+        -canal: CanalEnvoi
+        +constructor(canal: CanalEnvoi)
+        +envoyer(message: string) void
+    }
+
+    class NotificationSupport {
+        -canal: CanalEnvoi
+        +constructor(canal: CanalEnvoi)
+        +envoyer(message: string) void
+    }
+
+    %% Relations : Les canaux implémentent l'interface
+    CanalEnvoi <|.. EmailSender : implements
+    CanalEnvoi <|.. SmsSender : implements
+    CanalEnvoi <|.. PushSender : implements
+
+    %% Relations : Les notifications utilisent l'interface (COMPOSITION - le pont)
+    NotificationCommande o-- CanalEnvoi : utilise
+    NotificationLivraison o-- CanalEnvoi : utilise
+    NotificationSupport o-- CanalEnvoi : utilise
+
+    %% Notes explicatives
+    note for CanalEnvoi "IMPLÉMENTATION Interface définissant comment envoyer un message"
+
+    note for NotificationCommande "ABSTRACTION Classes utilisant un canal pour envoyer leurs messages"
+
+    note for EmailSender "Implémentations concrètes des différents canaux d'envoi"
