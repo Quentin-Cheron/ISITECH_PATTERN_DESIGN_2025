@@ -1,7 +1,3 @@
-// ============================================
-// UTILITAIRES
-// ============================================
-
 const generateGuid = (): string => {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -9,10 +5,6 @@ const generateGuid = (): string => {
     return v.toString(16);
   });
 };
-
-// ============================================
-// SOUS-SYSTÈMES EXISTANTS
-// ============================================
 
 class InventoryService {
   constructor() {

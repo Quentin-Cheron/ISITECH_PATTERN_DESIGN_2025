@@ -1,0 +1,46 @@
+---
+title: Pattern Singleton - Configuration Hospitalière
+---
+classDiagram
+    class HospitalConfiguration {
+        -instance: HospitalConfiguration
+        -databaseHost: string
+        -databasePort: number
+        -databaseName: string
+        -databaseUser: string
+        -databasePassword: string
+        -language: string
+        -timezone: string
+        -maxConnections: number
+        -HospitalConfiguration()
+        +getInstance() HospitalConfiguration
+        +getDatabaseHost() string
+        +setDatabaseHost(host: string) void
+        +getDatabasePort() number
+        +setDatabasePort(port: number) void
+        +getDatabaseName() string
+        +setDatabaseName(name: string) void
+        +getLanguage() string
+        +setLanguage(lang: string) void
+        +getTimezone() string
+        +setTimezone(tz: string) void
+        +getMaxConnections() number
+        +setMaxConnections(max: number) void
+        +getConnectionString() string
+    }
+
+    class PatientModule {
+        +managePatients() void
+    }
+
+    class AppointmentModule {
+        +scheduleAppointment() void
+    }
+
+    class BillingModule {
+        +processBilling() void
+    }
+
+    PatientModule ..> HospitalConfiguration : uses getInstance()
+    AppointmentModule ..> HospitalConfiguration : uses getInstance()
+    BillingModule ..> HospitalConfiguration : uses getInstance()
