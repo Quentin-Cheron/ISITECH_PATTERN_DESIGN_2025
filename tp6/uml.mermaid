@@ -1,0 +1,142 @@
+---
+title: Pattern Facade + Proxy - Système E-commerce
+---
+classDiagram
+    %% ====================================
+    %% INTERFACES
+    %% ====================================
+
+    class IPaymentService {
+        <<interface>>
+        +processPayment(customerId: string, amount: number) boolean
+        +refundPayment(transactionId: string) void
+    }
+
+    class OrderDetails {
+        <<interface>>
+        +productId: string
+        +customerId: string
+        +amount: number
+        +quantity: number
+        +shippingAddress: string
+        +customerEmail: string
+    }
+
+    class OrderResult {
+        <<interface>>
+        +success: boolean
+        +orderId?: string
+        +trackingNumber?: string
+        +message: string
+    }
+
+    %% ====================================
+    %% SERVICES RÉELS (Sous-systèmes)
+    %% ====================================
+
+    class InventoryService {
+        +constructor()
+        +checkStock(productId: string, quantity: number) boolean
+        +reserveStock(productId: string, quantity: number) void
+    }
+
+    class PaymentService {
+        +constructor()
+        +processPayment(customerId: string, amount: number) boolean
+        +refundPayment(transactionId: string) void
+    }
+
+    class ShippingService {
+        +constructor()
+        +createShipment(orderId: string, address: string) string
+    }
+
+    class NotificationService {
+        +constructor()
+        +sendEmail(email: string, subject: string, body: string) void
+        +sendSMS(phone: string, message: string) void
+    }
+
+    class LoyaltyService {
+        +constructor()
+        +addPoints(customerId: string, points: number) void
+        +getPoints(customerId: string) number
+    }
+
+    %% ====================================
+    %% PATTERN PROXY
+    %% ====================================
+
+    class PaymentServiceProxy {
+        -realPaymentService: PaymentService | null
+        -userRole: string
+        +constructor(userRole: string)
+        -getRealService() PaymentService
+        -checkAccess(operation: string) boolean
+        +processPayment(customerId: string, amount: number) boolean
+        +refundPayment(transactionId: string) void
+    }
+
+    %% ====================================
+    %% PATTERN FACADE
+    %% ====================================
+
+    class EcommerceFacade {
+        -inventoryService: InventoryService | null
+        -paymentServiceProxy: PaymentServiceProxy
+        -shippingService: ShippingService | null
+        -notificationService: NotificationService | null
+        -loyaltyService: LoyaltyService | null
+        +constructor(userRole: string)
+        -getInventoryService() InventoryService
+        -getShippingService() ShippingService
+        -getNotificationService() NotificationService
+        -getLoyaltyService() LoyaltyService
+        +placeOrder(orderDetails: OrderDetails) OrderResult
+        +cancelOrder(orderId: string, transactionId: string) void
+    }
+
+    %% ====================================
+    %% CLIENT
+    %% ====================================
+
+    class Client {
+        +main() void
+    }
+
+    %% ====================================
+    %% RELATIONS
+    %% ====================================
+
+    %% Implémentation d'interface
+    IPaymentService <|.. PaymentService : implements
+    IPaymentService <|.. PaymentServiceProxy : implements
+
+    %% Proxy contient le service réel (lazy loading)
+    PaymentServiceProxy o-- PaymentService : lazy loads
+
+    %% Facade utilise les services (lazy loading)
+    EcommerceFacade o-- InventoryService : lazy loads
+    EcommerceFacade *-- PaymentServiceProxy : contains
+    EcommerceFacade o-- ShippingService : lazy loads
+    EcommerceFacade o-- NotificationService : lazy loads
+    EcommerceFacade o-- LoyaltyService : lazy loads
+
+    %% Facade utilise les interfaces
+    EcommerceFacade ..> OrderDetails : uses
+    EcommerceFacade ..> OrderResult : uses
+
+    %% Client utilise la Facade
+    Client --> EcommerceFacade : uses
+
+    %% ====================================
+    %% NOTES
+    %% ====================================
+
+    note for EcommerceFacade "PATTERN FACADE Interface simplifiée unifiée Cache la complexité des sous-systèmes Implémente le lazy loading pour tous les services"
+
+    note for PaymentServiceProxy "PATTERN PROXY (Protection) Contrôle d'accès basé sur les rôles Lazy loading du PaymentService réel Vérifie les droits avant chaque opération"
+
+    note for InventoryService "SERVICE RÉEL Chargé en lazy loading Initialisation coûteuse retardée"
+
+    note for Client "Le client n'interagit qu'avec la Facade Ne connaît pas les sous-systèmes Code simplifié et découplé"

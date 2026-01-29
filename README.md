@@ -764,5 +764,3 @@ npm test
 ```
 
 ---
-
-**Bon apprentissage ! 🎓**

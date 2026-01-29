@@ -22,7 +22,6 @@ class InternalPaymentService implements IPaymentService {
 
 class PaymentPro {
   // Exécute une transaction avec code devise numérique
-  // Codes devise : 1=EUR, 2=USD, 3=GBP
   ExecuterTransaction(montant: number, codeDevise: number): string {
     console.log(
       `🔷 PaymentPro: Transaction de ${montant} avec devise code ${codeDevise}`,
@@ -38,7 +37,7 @@ class PaymentPro {
 
   // Retourne un code numérique : 0=En cours, 1=Validé, 2=Échoué
   ObtenirEtat(reference: string): number {
-    return 1; // Simulé comme validé
+    return 1;
   }
 
   private generateId(): string {
@@ -54,11 +53,9 @@ class PaymentPro {
 }
 
 class PaymentProAdapter implements IPaymentService {
-  private paymentPro: PaymentPro; // Composition : contient l'objet à adapter
-  private lastTransactionId: string = ""; // Stocke le dernier ID de transaction
+  private paymentPro: PaymentPro;
+  private lastTransactionId: string = "";
 
-  // Table de conversion : devise string → code numérique PaymentPro
-  // Selon la spec : 1=EUR, 2=USD, 3=GBP
   private currencyMap: Map<string, number> = new Map([
     ["EUR", 1],
     ["USD", 2],
@@ -74,20 +71,16 @@ class PaymentProAdapter implements IPaymentService {
       `\n🔄 [ADAPTER] Conversion de ProcessPayment vers ExecuterTransaction`,
     );
 
-    // 1. Convertir la devise string en code numérique
     const codeDevise = this.convertCurrencyStringToCode(currency);
     console.log(`   ├─ Devise: "${currency}" → code ${codeDevise}`);
 
-    // 2. Appeler la méthode de PaymentPro avec les paramètres convertis
     const transactionId = this.paymentPro.ExecuterTransaction(
       amount,
       codeDevise,
     );
 
-    // 3. Stocker l'ID pour les opérations ultérieures
     this.lastTransactionId = transactionId;
 
-    // 4. Adapter le retour : string (ID) → boolean (succès si ID non vide)
     const success = transactionId.length > 0;
     console.log(
       `   └─ Résultat: ID="${transactionId.substring(0, 8)}..." → success=${success}\n`,
@@ -105,7 +98,6 @@ class PaymentProAdapter implements IPaymentService {
       `   ├─ Montant demandé: ${amount} (ignoré par PaymentPro - annulation complète)`,
     );
 
-    // Appeler la méthode d'annulation de PaymentPro
     const result = this.paymentPro.AnnulerTransaction(transactionId);
 
     console.log(`   └─ Résultat: ${result}\n`);
@@ -117,10 +109,8 @@ class PaymentProAdapter implements IPaymentService {
       `\n🔄 [ADAPTER] Conversion de GetTransactionStatus vers ObtenirEtat`,
     );
 
-    // 1. Appeler la méthode de PaymentPro
     const statusCode = this.paymentPro.ObtenirEtat(transactionId);
 
-    // 2. Convertir le code numérique en string descriptif
     const statusString = this.convertStatusCodeToString(statusCode);
 
     console.log(`   ├─ Code PaymentPro: ${statusCode}`);
@@ -129,7 +119,6 @@ class PaymentProAdapter implements IPaymentService {
     return statusString;
   }
 
-  // Convertit une devise string (EUR, USD, GBP) en code numérique (1, 2, 3)
   private convertCurrencyStringToCode(currency: string): number {
     const code = this.currencyMap.get(currency.toUpperCase());
 
@@ -143,22 +132,19 @@ class PaymentProAdapter implements IPaymentService {
     return code;
   }
 
-  // Convertit un code de statut numérique en string descriptif
-  // 0 → "Pending", 1 → "Completed", 2 → "Failed"
   private convertStatusCodeToString(statusCode: number): string {
     switch (statusCode) {
       case 0:
-        return "Pending"; // En cours
+        return "Pending";
       case 1:
-        return "Completed"; // Validé
+        return "Completed";
       case 2:
-        return "Failed"; // Échoué
+        return "Failed";
       default:
-        return "Unknown"; // Statut inconnu
+        return "Unknown";
     }
   }
 
-  // Getter pour récupérer le dernier ID de transaction (utile pour les tests)
   getLastTransactionId(): string {
     return this.lastTransactionId;
   }
@@ -173,3 +159,46 @@ function ProcessOrder(paymentService: IPaymentService, total: number): void {
     console.log("❌ Échec du traitement de la commande");
   }
 }
+
+function Main(): void {
+  const internalService = new InternalPaymentService();
+  ProcessOrder(internalService, 150.0);
+
+  console.log("\n📊 Vérification du statut:");
+  const status1 = internalService.GetTransactionStatus("TXN-001");
+  console.log(`   Statut: ${status1}`);
+
+  console.log("\n💰 Remboursement:");
+  internalService.RefundPayment("TXN-001", 50.0);
+  const paymentPro = new PaymentPro();
+  const adapter = new PaymentProAdapter(paymentPro);
+
+  ProcessOrder(adapter, 250.0);
+
+  console.log("\n📊 Vérification du statut:");
+  const transactionId = adapter.getLastTransactionId();
+  const status2 = adapter.GetTransactionStatus(transactionId);
+  console.log(`   Statut: ${status2}`);
+
+  console.log("\n💰 Remboursement:");
+  adapter.RefundPayment(transactionId, 100.0);
+
+  const paymentServices: IPaymentService[] = [
+    new InternalPaymentService(),
+    new PaymentProAdapter(new PaymentPro()),
+  ];
+
+  paymentServices.forEach((service, index) => {
+    console.log(`\n🔸 Service ${index + 1}:`);
+    service.ProcessPayment(99.99, "USD");
+  });
+
+  const multiCurrencyAdapter = new PaymentProAdapter(new PaymentPro());
+
+  const currencies = ["EUR", "USD", "GBP"];
+  currencies.forEach((currency) => {
+    console.log(`\n💱 Paiement en ${currency}:`);
+    multiCurrencyAdapter.ProcessPayment(100, currency);
+  });
+}
+Main();

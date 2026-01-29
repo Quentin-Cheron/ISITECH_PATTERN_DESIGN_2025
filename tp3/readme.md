@@ -35,7 +35,7 @@
    **Avantages :**
    - Ajouter un nouveau type de notification ne nécessite qu'une seule nouvelle classe
    - Ajouter un nouveau canal ne nécessite qu'une seule nouvelle classe d'implémentation
-   - Pas d'explosion combinatoire : 3 types × 3 canaux = 6 classes au lieu de 9
+   - Moins de classes : 3 types × 3 canaux = 6 classes au lieu de 9
    - Changement de canal à l'exécution possible
    - Respect du principe Open/Closed
 

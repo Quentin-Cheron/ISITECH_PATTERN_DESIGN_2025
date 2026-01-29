@@ -1,0 +1,46 @@
+---
+title: Pattern Adapter - Système de Paiement
+---
+classDiagram
+    class IPaymentService {
+        <<interface>>
+        +ProcessPayment(amount: number, currency: string) boolean
+        +RefundPayment(transactionId: string, amount: number) boolean
+        +GetTransactionStatus(transactionId: string) string
+    }
+
+    class InternalPaymentService {
+        +ProcessPayment(amount: number, currency: string) boolean
+        +RefundPayment(transactionId: string, amount: number) boolean
+        +GetTransactionStatus(transactionId: string) string
+    }
+
+    class PaymentPro {
+        +ExecuterTransaction(montant: number, codeDevise: number) string
+        +AnnulerTransaction(reference: string) boolean
+        +ObtenirEtat(reference: string) number
+        -generateId() string
+    }
+
+    class PaymentProAdapter {
+        -paymentPro: PaymentPro
+        -lastTransactionId: string
+        -currencyMap: Map~string, number~
+        +constructor(paymentPro: PaymentPro)
+        +ProcessPayment(amount: number, currency: string) boolean
+        +RefundPayment(transactionId: string, amount: number) boolean
+        +GetTransactionStatus(transactionId: string) string
+        +getLastTransactionId() string
+        -convertCurrencyStringToCode(currency: string) number
+        -convertStatusCodeToString(statusCode: number) string
+    }
+
+    IPaymentService <|.. InternalPaymentService : implements
+    IPaymentService <|.. PaymentProAdapter : implements
+
+    PaymentProAdapter o-- PaymentPro : adapts
+
+    note for IPaymentService "Interface cible Définit l'interface standard de paiement"
+    note for InternalPaymentService "Implémentation native Utilise directement l'interface IPaymentService"
+    note for PaymentPro "Service externe (Adaptee) API incompatible avec méthodes françaises et codes numériques"
+    note for PaymentProAdapter "Adapter Convertit l'interface PaymentPro vers IPaymentService - Devise: string → number - Statut: number → string - Transaction ID: stocké pour référence"

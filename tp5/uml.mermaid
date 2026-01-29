@@ -1,0 +1,56 @@
+---
+title: Pattern Decorator - Système de Traitement de Messages
+---
+classDiagram
+    class IMessage {
+        <<interface>>
+        +process() string
+    }
+
+    class Message {
+        -content: string
+        +constructor(content: string)
+        +process() string
+    }
+
+    class MessageDecorator {
+        <<abstract>>
+        #message: IMessage
+        +constructor(message: IMessage)
+        +process()* string
+    }
+
+    class CompressDecorator {
+        +constructor(message: IMessage)
+        +process() string
+    }
+
+    class EncryptDecorator {
+        +constructor(message: IMessage)
+        +process() string
+    }
+
+    class SignDecorator {
+        +constructor(message: IMessage)
+        +process() string
+    }
+
+    class LogDecorator {
+        +constructor(message: IMessage)
+        +process() string
+    }
+
+    IMessage <|.. Message : implements
+    IMessage <|.. MessageDecorator : implements
+
+    MessageDecorator <|-- CompressDecorator : extends
+    MessageDecorator <|-- EncryptDecorator : extends
+    MessageDecorator <|-- SignDecorator : extends
+    MessageDecorator <|-- LogDecorator : extends
+
+    MessageDecorator o-- IMessage : wraps
+
+    note for IMessage "Interface commune Définit le contrat process()"
+    note for Message "Composant de base Contient le message original"
+    note for MessageDecorator "Decorator abstrait Enveloppe un IMessage et délègue le traitement"
+    note for CompressDecorator "Decorator concret Ajoute la compression au message"
