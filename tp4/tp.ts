@@ -6,12 +6,12 @@ interface IPaymentService {
 
 class InternalPaymentService implements IPaymentService {
   ProcessPayment(amount: number, currency: string): boolean {
-    console.log(`💳 Paiement interne: ${amount} ${currency}`);
+    console.log(`Paiement interne: ${amount} ${currency}`);
     return true;
   }
 
   RefundPayment(transactionId: string, amount: number): boolean {
-    console.log(`↩️  Remboursement interne: ${transactionId} - ${amount}`);
+    console.log(`Remboursement interne: ${transactionId} - ${amount}`);
     return true;
   }
 
@@ -24,14 +24,14 @@ class PaymentPro {
   // Exécute une transaction avec code devise numérique
   ExecuterTransaction(montant: number, codeDevise: number): string {
     console.log(
-      `🔷 PaymentPro: Transaction de ${montant} avec devise code ${codeDevise}`,
+      `PaymentPro: Transaction de ${montant} avec devise code ${codeDevise}`,
     );
     return this.generateId();
   }
 
   // Annule complètement une transaction
   AnnulerTransaction(reference: string): boolean {
-    console.log(`🔷 PaymentPro: Annulation de ${reference}`);
+    console.log(`PaymentPro: Annulation de ${reference}`);
     return true;
   }
 
@@ -68,11 +68,11 @@ class PaymentProAdapter implements IPaymentService {
 
   ProcessPayment(amount: number, currency: string): boolean {
     console.log(
-      `\n🔄 [ADAPTER] Conversion de ProcessPayment vers ExecuterTransaction`,
+      `[ADAPTER] Conversion de ProcessPayment vers ExecuterTransaction`,
     );
 
     const codeDevise = this.convertCurrencyStringToCode(currency);
-    console.log(`   ├─ Devise: "${currency}" → code ${codeDevise}`);
+    console.log(`Devise: "${currency}" code ${codeDevise}`);
 
     const transactionId = this.paymentPro.ExecuterTransaction(
       amount,
@@ -83,7 +83,7 @@ class PaymentProAdapter implements IPaymentService {
 
     const success = transactionId.length > 0;
     console.log(
-      `   └─ Résultat: ID="${transactionId.substring(0, 8)}..." → success=${success}\n`,
+      `Résultat: ID="${transactionId.substring(0, 8)}..." success=${success}`,
     );
 
     return success;
@@ -91,11 +91,11 @@ class PaymentProAdapter implements IPaymentService {
 
   RefundPayment(transactionId: string, amount: number): boolean {
     console.log(
-      `\n🔄 [ADAPTER] Conversion de RefundPayment vers AnnulerTransaction`,
+      `[ADAPTER] Conversion de RefundPayment vers AnnulerTransaction`,
     );
-    console.log(`   ├─ Transaction: ${transactionId}`);
+    console.log(`Transaction: ${transactionId}`);
     console.log(
-      `   ├─ Montant demandé: ${amount} (ignoré par PaymentPro - annulation complète)`,
+      `Montant demandé: ${amount} (ignoré par PaymentPro - annulation complète)`,
     );
 
     const result = this.paymentPro.AnnulerTransaction(transactionId);
@@ -106,7 +106,7 @@ class PaymentProAdapter implements IPaymentService {
 
   GetTransactionStatus(transactionId: string): string {
     console.log(
-      `\n🔄 [ADAPTER] Conversion de GetTransactionStatus vers ObtenirEtat`,
+      `[ADAPTER] Conversion de GetTransactionStatus vers ObtenirEtat`,
     );
 
     const statusCode = this.paymentPro.ObtenirEtat(transactionId);
@@ -124,7 +124,7 @@ class PaymentProAdapter implements IPaymentService {
 
     if (code === undefined) {
       console.warn(
-        `⚠️  Devise "${currency}" non supportée, utilisation de EUR par défaut`,
+        `Devise "${currency}" non supportée, utilisation de EUR par défaut`,
       );
       return 1; // EUR par défaut
     }
@@ -154,7 +154,7 @@ function ProcessOrder(paymentService: IPaymentService, total: number): void {
   console.log(`📦 Traitement d'une commande de ${total} EUR`);
   const success = paymentService.ProcessPayment(total, "EUR");
   if (success) {
-    console.log("✅ Commande traitée avec succès");
+    console.log("Commande traitée avec succès");
   } else {
     console.log("❌ Échec du traitement de la commande");
   }
@@ -164,23 +164,17 @@ function Main(): void {
   const internalService = new InternalPaymentService();
   ProcessOrder(internalService, 150.0);
 
-  console.log("\n📊 Vérification du statut:");
   const status1 = internalService.GetTransactionStatus("TXN-001");
-  console.log(`   Statut: ${status1}`);
 
-  console.log("\n💰 Remboursement:");
   internalService.RefundPayment("TXN-001", 50.0);
   const paymentPro = new PaymentPro();
   const adapter = new PaymentProAdapter(paymentPro);
 
   ProcessOrder(adapter, 250.0);
 
-  console.log("\n📊 Vérification du statut:");
   const transactionId = adapter.getLastTransactionId();
   const status2 = adapter.GetTransactionStatus(transactionId);
-  console.log(`   Statut: ${status2}`);
 
-  console.log("\n💰 Remboursement:");
   adapter.RefundPayment(transactionId, 100.0);
 
   const paymentServices: IPaymentService[] = [
@@ -189,7 +183,6 @@ function Main(): void {
   ];
 
   paymentServices.forEach((service, index) => {
-    console.log(`\n🔸 Service ${index + 1}:`);
     service.ProcessPayment(99.99, "USD");
   });
 
@@ -197,7 +190,6 @@ function Main(): void {
 
   const currencies = ["EUR", "USD", "GBP"];
   currencies.forEach((currency) => {
-    console.log(`\n💱 Paiement en ${currency}:`);
     multiCurrencyAdapter.ProcessPayment(100, currency);
   });
 }

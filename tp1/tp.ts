@@ -1,12 +1,12 @@
-interface RIB {
+interface IRIB {
   genererRib(): string;
 }
 
-interface Attestation {
+interface IAttestation {
   genererAttestation(): string;
 }
 
-class RIBParticulier implements RIB {
+class RIBParticulier implements IRIB {
   constructor(private rib: string) {}
 
   genererRib(): string {
@@ -14,7 +14,7 @@ class RIBParticulier implements RIB {
   }
 }
 
-class AttestationParticulier implements Attestation {
+class AttestationParticulier implements IAttestation {
   constructor(private attestation: string) {}
 
   genererAttestation(): string {
@@ -22,7 +22,7 @@ class AttestationParticulier implements Attestation {
   }
 }
 
-class RIBProfessionnel implements RIB {
+class RIBProfessionnel implements IRIB {
   constructor(
     private rib: string,
     private siret: string,
@@ -33,7 +33,7 @@ class RIBProfessionnel implements RIB {
   }
 }
 
-class AttestationProfessionnel implements Attestation {
+class AttestationProfessionnel implements IAttestation {
   constructor(
     private attestation: string,
     private mentionLegale: string,
@@ -45,8 +45,8 @@ class AttestationProfessionnel implements Attestation {
 }
 
 interface DocumentFactory {
-  creerRIB(): RIB;
-  creerAttestation(): Attestation;
+  creerRIB(): IRIB;
+  creerAttestation(): IAttestation;
 }
 
 class Particulier {
@@ -68,11 +68,11 @@ class Professionnel {
 class ParticulierFactory implements DocumentFactory {
   constructor(private client: Particulier) {}
 
-  creerRIB(): RIB {
+  creerRIB(): IRIB {
     return new RIBParticulier(this.client.rib);
   }
 
-  creerAttestation(): Attestation {
+  creerAttestation(): IAttestation {
     return new AttestationParticulier(this.client.attestation);
   }
 }
@@ -80,11 +80,11 @@ class ParticulierFactory implements DocumentFactory {
 class ProfessionnelFactory implements DocumentFactory {
   constructor(private client: Professionnel) {}
 
-  creerRIB(): RIB {
+  creerRIB(): IRIB {
     return new RIBProfessionnel(this.client.rib, this.client.siret);
   }
 
-  creerAttestation(): Attestation {
+  creerAttestation(): IAttestation {
     return new AttestationProfessionnel(
       this.client.attestation,
       this.client.mentionLegale,

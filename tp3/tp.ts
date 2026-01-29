@@ -76,14 +76,14 @@ class PushSender {
   }
 }
 
-interface CanalEnvoi {
+interface ICanalEnvoi {
   envoyer(message: string): void;
 }
 
 class NotificationSupport {
-  private canal: CanalEnvoi;
+  private canal: ICanalEnvoi;
 
-  constructor(canal: CanalEnvoi) {
+  constructor(canal: ICanalEnvoi) {
     this.canal = canal;
   }
 
@@ -93,9 +93,9 @@ class NotificationSupport {
 }
 
 class NotificationLivraison {
-  private canal: CanalEnvoi;
+  private canal: ICanalEnvoi;
 
-  constructor(canal: CanalEnvoi) {
+  constructor(canal: ICanalEnvoi) {
     this.canal = canal;
   }
 
@@ -105,9 +105,9 @@ class NotificationLivraison {
 }
 
 class NotificationCommande {
-  private canal: CanalEnvoi;
+  private canal: ICanalEnvoi;
 
-  constructor(canal: CanalEnvoi) {
+  constructor(canal: ICanalEnvoi) {
     this.canal = canal;
   }
 
